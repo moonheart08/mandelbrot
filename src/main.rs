@@ -1,4 +1,5 @@
-use num::Complex;
+use num::{Complex, rational::Ratio};
+use std::collections::HashSet;
 
 /// Try to determine if `c` is in the Mandelbrot set, using at most `limit`
 /// iterations to decide.
@@ -10,9 +11,12 @@ use num::Complex;
 /// return `None`.
 fn escape_time(c: Complex<f64>, limit: u32) -> Option<u32> {
     let mut z = Complex { re: 0.0, im: 0.0 };
+    // ew. i hate this. --moony
+    let mut set = HashSet::with_capacity(limit as usize);
     for i in 0..limit {
         z = z * z + c;
-        if z.norm_sqr() > 4.0 {
+        let a = (Ratio::<isize>::approximate_float(z.re).unwrap(), Ratio::<isize>::approximate_float(z.im).unwrap());
+        if (!set.insert(a)) || z.norm_sqr() > 4.0 {
             return Some(i);
         }
     }
